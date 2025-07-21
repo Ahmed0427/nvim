@@ -14,3 +14,5 @@ vim.o.numberwidth = 4
 vim.o.updatetime = 250
 vim.o.timeoutlen = 500
 vim.o.undofile = true
+vim.o.hlsearch = false
+vim.o.splitbelow = true
