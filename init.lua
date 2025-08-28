@@ -21,3 +21,13 @@ require('lazy').setup {
   require 'plugins.comment',
   require 'plugins.misc',
 }
+
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = "*.go",
+    callback = function()
+        local view = vim.fn.winsaveview() 
+        vim.cmd('%!goimports')           
+        vim.fn.winrestview(view)        
+    end,
+})
