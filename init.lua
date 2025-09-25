@@ -31,3 +31,22 @@ vim.api.nvim_create_autocmd("BufWritePre", {
         vim.fn.winrestview(view)        
     end,
 })
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = { "*.c", "*.cpp", "*.h", "*.hpp" },
+    callback = function()
+        local view = vim.fn.winsaveview()   
+        vim.cmd("%!clang-format")          
+        vim.fn.winrestview(view)          
+    end,
+})
+
+vim.api.nvim_create_autocmd("BufWritePre", {
+    pattern = { "*.py" },
+    callback = function()
+        local view = vim.fn.winsaveview()   
+        vim.cmd("%!black -q -")            
+        vim.fn.winrestview(view)          
+    end,
+})
+
