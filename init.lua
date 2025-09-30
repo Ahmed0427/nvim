@@ -57,3 +57,22 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   callback = safe_format("black -q -"),
 })
 
+vim.api.nvim_create_autocmd("BufWritePre", {
+  pattern = {
+    "*.html",
+    "*.css",
+    "*.scss",
+    "*.js",
+    "*.jsx",
+    "*.ts",
+    "*.tsx",
+    "*.json",
+    "*.md",
+    "*.yaml",
+    "*.yml",
+  },
+  callback = function()
+    local filepath = vim.fn.expand("%:p") -- expand full file path
+    safe_format("prettier --stdin-filepath " .. vim.fn.shellescape(filepath))()
+  end,
+})
