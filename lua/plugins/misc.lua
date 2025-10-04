@@ -4,4 +4,9 @@ return {
     -- Hints keybinds
     'folke/which-key.nvim',
   },
+  {
+    -- Automatically detects tabstop/shiftwidth
+    'tpope/vim-sleuth',
+  },
 }
+
