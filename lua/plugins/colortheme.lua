@@ -13,7 +13,7 @@ vim.api.nvim_create_autocmd("User", {
   pattern = "VeryLazy",
   callback = function()
     -- Options: "tokyonight", "gruvbox", "rose-pine"
-    setTheme("tokyonight")
+    setTheme("rose-pine")
   end,
 })
 
