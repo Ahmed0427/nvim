@@ -122,34 +122,6 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"williamboman/mason.nvim",
-		build = ":MasonUpdate",
-		config = function()
-			require("mason").setup()
-		end,
-	},
-	{
-		"WhoIsSethDaniel/mason-tool-installer.nvim",
-		dependencies = { "williamboman/mason.nvim" },
-		config = function()
-			require("mason-tool-installer").setup({
-				ensure_installed = {
-					"goimports",
-					"clang-format",
-					"black",
-					"prettier",
-					"stylua",
-					"shfmt",
-					"shellcheck",
-					"tflint",
-				},
-				auto_update = false,
-				run_on_start = true,
-				start_delay = 3000,
-			})
-		end,
-	},
-	{
 		"mbbill/undotree",
 		config = function()
 			vim.keymap.set("n", "<leader>u", vim.cmd.UndotreeToggle)
@@ -157,38 +129,6 @@ require("lazy").setup({
 	},
 	{ "folke/which-key.nvim" },
 	{ "tpope/vim-sleuth" },
-	{
-		"stevearc/conform.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		config = function()
-			require("conform").setup({
-				formatters_by_ft = {
-					lua = { "stylua" },
-					go = { "goimports" },
-					c = { "clang_format" },
-					cpp = { "clang_format" },
-					h = { "clang_format" },
-					hpp = { "clang_format" },
-					python = { "black" },
-					html = { "prettier" },
-					css = { "prettier" },
-					scss = { "prettier" },
-					javascript = { "prettier" },
-					javascriptreact = { "prettier" },
-					typescript = { "prettier" },
-					typescriptreact = { "prettier" },
-					json = { "prettier" },
-					markdown = { "prettier" },
-					yaml = { "prettier" },
-					sh = { "shfmt" },
-					bash = { "shfmt" },
-					terraform = { "terraform_fmt" },
-					hcl = { "terraform_fmt" },
-				},
-				format_on_save = { lsp_fallback = true, timeout_ms = 500 },
-			})
-		end,
-	},
 	{
 		"nvim-telescope/telescope.nvim",
 		branch = "master",
@@ -260,6 +200,7 @@ require("lazy").setup({
 			pcall(require("telescope").load_extension, "ui-select")
 		end,
 	},
+
 	{
 		"nvim-treesitter/nvim-treesitter",
 		build = ":TSUpdate",
@@ -295,6 +236,68 @@ require("lazy").setup({
 				"terraform",
 				"hcl",
 				"toml",
+				"rust",
+			})
+		end,
+	},
+	{
+		"williamboman/mason.nvim",
+		build = ":MasonUpdate",
+		config = function()
+			require("mason").setup()
+		end,
+	},
+	{
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		dependencies = { "williamboman/mason.nvim" },
+		config = function()
+			require("mason-tool-installer").setup({
+				ensure_installed = {
+					"goimports",
+					"clang-format",
+					"black",
+					"prettier",
+					"stylua",
+					"shfmt",
+					"shellcheck",
+					"tflint",
+				},
+				auto_update = false,
+				run_on_start = true,
+				start_delay = 3000,
+			})
+		end,
+	},
+	{
+		"stevearc/conform.nvim",
+		event = { "BufReadPre", "BufNewFile" },
+		config = function()
+			require("conform").setup({
+				formatters_by_ft = {
+					lua = { "stylua" },
+					go = { "goimports" },
+					c = { "clang_format" },
+					cpp = { "clang_format" },
+					h = { "clang_format" },
+					hpp = { "clang_format" },
+					python = { "black" },
+					html = { "prettier" },
+					css = { "prettier" },
+					scss = { "prettier" },
+					javascript = { "prettier" },
+					javascriptreact = { "prettier" },
+					typescript = { "prettier" },
+					typescriptreact = { "prettier" },
+					json = { "prettier" },
+					markdown = { "prettier" },
+					yaml = { "prettier" },
+					sh = { "shfmt" },
+					bash = { "shfmt" },
+					terraform = { "terraform_fmt" },
+					hcl = { "terraform_fmt" },
+					rust = { "rustfmt" },
+				},
+				format_on_save = { lsp_fallback = false, timeout_ms = 500 },
 			})
 		end,
 	},
