@@ -188,6 +188,7 @@ require("lazy").setup({
 			require("telescope").setup({
 				defaults = {
 					path_display = { "smart" },
+					file_ignore_patterns = { "%.git/" },
 					mappings = {
 						i = {
 							["<C-k>"] = actions.move_selection_previous,
@@ -195,13 +196,12 @@ require("lazy").setup({
 							["<C-l>"] = actions.select_default,
 						},
 					},
-					file_ignore_patterns = { "node_modules", "target/", "%.git/", "%.venv", "build/", "%.class" },
 				},
 				pickers = {
-					find_files = { hidden = true, no_ignore = true },
+					find_files = { hidden = true },
 					live_grep = {
 						additional_args = function()
-							return { "--hidden", "--no-ignore" }
+							return { "--hidden" }
 						end,
 					},
 				},
@@ -228,27 +228,7 @@ require("lazy").setup({
 		end,
 		config = function()
 			require("nvim-treesitter").setup({})
-			require("nvim-treesitter").install({
-				"lua",
-				"java",
-				"python",
-				"go",
-				"c",
-				"cpp",
-				"html",
-				"css",
-				"javascript",
-				"typescript",
-				"json",
-				"markdown",
-				"yaml",
-				"bash",
-				"dockerfile",
-				"terraform",
-				"hcl",
-				"toml",
-				"rust",
-			})
+			require("nvim-treesitter").install({})
 		end,
 	},
 	{
@@ -259,56 +239,85 @@ require("lazy").setup({
 		end,
 	},
 	{
-		"WhoIsSethDaniel/mason-tool-installer.nvim",
-		dependencies = { "williamboman/mason.nvim" },
+		"neovim/nvim-lspconfig",
+		dependencies = {
+			"williamboman/mason.nvim",
+			"williamboman/mason-lspconfig.nvim",
+		},
 		config = function()
-			require("mason-tool-installer").setup({
-				ensure_installed = {
-					"goimports",
-					"clang-format",
-					"black",
-					"prettier",
-					"stylua",
-					"shfmt",
-					"shellcheck",
-					"tflint",
+			vim.lsp.config("lua_ls", {
+				settings = {
+					Lua = {
+						diagnostics = { globals = { "vim" } },
+						workspace = { checkThirdParty = false },
+					},
 				},
-				auto_update = false,
-				run_on_start = true,
-				start_delay = 3000,
 			})
-		end,
-	},
-	{
-		"stevearc/conform.nvim",
-		event = { "BufReadPre", "BufNewFile" },
-		config = function()
-			require("conform").setup({
-				formatters_by_ft = {
-					lua = { "stylua" },
-					go = { "goimports" },
-					c = { "clang_format" },
-					cpp = { "clang_format" },
-					h = { "clang_format" },
-					hpp = { "clang_format" },
-					python = { "black" },
-					html = { "prettier" },
-					css = { "prettier" },
-					scss = { "prettier" },
-					javascript = { "prettier" },
-					javascriptreact = { "prettier" },
-					typescript = { "prettier" },
-					typescriptreact = { "prettier" },
-					json = { "prettier" },
-					markdown = { "prettier" },
-					yaml = { "prettier" },
-					sh = { "shfmt" },
-					bash = { "shfmt" },
-					terraform = { "terraform_fmt" },
-					hcl = { "terraform_fmt" },
-					rust = { "rustfmt" },
+
+			require("mason-lspconfig").setup({
+				ensure_installed = {
+					"lua_ls",
+					"gopls",
+					"rust_analyzer",
+					"pyright",
+					"ruff",
+					"clangd",
+					"ts_ls",
+					"html",
+					"cssls",
+					"jsonls",
+					"yamlls",
+					"bashls",
+					"dockerls",
+					"terraformls",
 				},
-				format_on_save = { lsp_fallback = false, timeout_ms = 500 },
+			})
+
+			vim.diagnostic.config({
+				severity_sort = true,
+				float = { border = "rounded", source = true },
+				virtual_text = { source = false },
+			})
+
+			vim.api.nvim_create_autocmd("LspAttach", {
+				callback = function(event)
+					local opts = { buffer = event.buf }
+					local map = function(mode, lhs, rhs, desc)
+						vim.keymap.set(mode, lhs, rhs, vim.tbl_extend("force", opts, { desc = desc }))
+					end
+
+					map("n", "gd", vim.lsp.buf.definition, "Goto definition")
+					map("n", "gD", vim.lsp.buf.declaration, "Goto declaration")
+					map("n", "gi", vim.lsp.buf.implementation, "Goto implementation")
+					map("n", "gy", vim.lsp.buf.type_definition, "Goto type definition")
+					map("n", "gr", vim.lsp.buf.references, "References")
+					map("n", "K", vim.lsp.buf.hover, "Hover")
+					map("i", "<C-k>", vim.lsp.buf.signature_help, "Signature help")
+					map("n", "<leader>rn", vim.lsp.buf.rename, "Rename")
+					map({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, "Code action")
+					map("n", "<leader>D", vim.diagnostic.open_float, "Line diagnostics")
+					map("n", "<leader>wd", vim.diagnostic.setqflist, "Diagnostics to quickfix")
+					map("n", "[d", function()
+						vim.diagnostic.jump({ count = -1, float = true })
+					end, "Prev diagnostic")
+					map("n", "]d", function()
+						vim.diagnostic.jump({ count = 1, float = true })
+					end, "Next diagnostic")
+					map("n", "<leader>lf", function()
+						vim.lsp.buf.format({ bufnr = event.buf, timeout_ms = 1000 })
+					end, "Format buffer")
+
+					local client = vim.lsp.get_client_by_id(event.data.client_id)
+					if client and client:supports_method("textDocument/formatting") then
+						vim.api.nvim_create_autocmd("BufWritePre", {
+							buffer = event.buf,
+							group = vim.api.nvim_create_augroup("lsp-format-" .. event.buf, { clear = true }),
+							callback = function()
+								vim.lsp.buf.format({ bufnr = event.buf, timeout_ms = 1000 })
+							end,
+						})
+					end
+				end,
 			})
 		end,
 	},
