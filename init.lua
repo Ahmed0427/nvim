@@ -239,6 +239,44 @@ require("lazy").setup({
 		end,
 	},
 	{
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+		dependencies = { "williamboman/mason.nvim" },
+		opts = {
+			ensure_installed = {
+				"stylua",
+				"shfmt",
+			},
+		},
+	},
+	{
+		"stevearc/conform.nvim",
+		event = { "BufWritePre" },
+		cmd = { "ConformInfo" },
+		keys = {
+			{
+				"<leader>lf",
+				function()
+					require("conform").format({ bufnr = 0, async = true, lsp_fallback = true })
+				end,
+				mode = "",
+				desc = "Format buffer",
+			},
+		},
+		opts = {
+			-- add a formatter here only for languages whose LSP can't format;
+			-- everything else falls back to its LSP (see lspconfig block below)
+			formatters_by_ft = {
+				lua = { "stylua" },
+				sh = { "shfmt" },
+				python = { "ruff_format" },
+			},
+			format_on_save = {
+				timeout_ms = 1000,
+				lsp_fallback = true,
+			},
+		},
+	},
+	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
 			"williamboman/mason.nvim",
@@ -270,6 +308,7 @@ require("lazy").setup({
 					"bashls",
 					"dockerls",
 					"terraformls",
+					"taplo",
 				},
 			})
 
@@ -303,20 +342,6 @@ require("lazy").setup({
 					map("n", "]d", function()
 						vim.diagnostic.jump({ count = 1, float = true })
 					end, "Next diagnostic")
-					map("n", "<leader>lf", function()
-						vim.lsp.buf.format({ bufnr = event.buf, timeout_ms = 1000 })
-					end, "Format buffer")
-
-					local client = vim.lsp.get_client_by_id(event.data.client_id)
-					if client and client:supports_method("textDocument/formatting") then
-						vim.api.nvim_create_autocmd("BufWritePre", {
-							buffer = event.buf,
-							group = vim.api.nvim_create_augroup("lsp-format-" .. event.buf, { clear = true }),
-							callback = function()
-								vim.lsp.buf.format({ bufnr = event.buf, timeout_ms = 1000 })
-							end,
-						})
-					end
 				end,
 			})
 		end,
